@@ -54,23 +54,23 @@ load_css()
 # Banner image
 st.image("naevis.jpg", use_column_width=True)
 
-async def generate_questions(difficulty, topic):
-    # Use OpenAI API to generate a list of questions based on the difficulty and topic
-    prompt = f"Create {difficulty} quiz questions about {topic} with their answers. Do not include multiple-choice options or the answers in the question text."
+async def generate_question(difficulty, topic):
+    # Use OpenAI API to generate a single question based on the difficulty and topic
+    prompt = f"Create one {difficulty} quiz question about {topic}. Format the response as 'Question: <question> Answer: <answer>'."
     response = await client.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=[{"role": "user", "content": prompt}]
     )
     text = response.choices[0].message.content.strip()
-    question_answer_pairs = [qa.strip() for qa in text.split("\n\n") if qa.strip()]
-    return question_answer_pairs
+    return text
 
-def extract_question_answer(pair):
+def extract_question_answer(text):
     try:
-        question, answer = pair.split("Answer:")
+        question, answer = text.split("Answer:")
+        question = question.replace("Question:", "").strip()
         return question.strip(), answer.strip()
     except ValueError:
-        return pair, "Unknown"
+        return text, "Unknown"
 
 def is_answer_correct(user_answer, correct_answer):
     try:
@@ -90,8 +90,6 @@ def main():
         st.session_state.score = 0
         
     # Initialize other necessary session state attributes
-    if "question_answer_pairs" not in st.session_state:
-        st.session_state.question_answer_pairs = []
     if "question" not in st.session_state:
         st.session_state.question = ""
     if "answer" not in st.session_state:
@@ -107,24 +105,19 @@ def main():
     score_values = {"easy": 1, "medium": 2, "hard": 3}
 
     # Selection for topic
-    topic = st.selectbox("Select a topic:", ["Trivia", "Math", "KPOP", "Entertainment", "Philippine History", "Korean Knowledge", "K-Drama", "Philippine Entertainment"])
+    topic = st.selectbox("Select a topic:", ["Trivia", "Math", "K-POP", "aespa", "BLACKPINK", "Entertainment", "Philippine History", "Bugtong", "Korean Knowledge", "K-Drama", "Philippine Entertainment"])
     
     # Selection for difficulty level
     difficulty = st.selectbox("Select the difficulty level:", ["easy", "medium", "hard"])
 
-    # Generate new questions if button is clicked
+    # Generate a new question if button is clicked
     if st.button("Generate Question"):
-        with st.spinner('Generating questions...'):
-            question_answer_pairs = asyncio.run(generate_questions(difficulty, topic))
-            if question_answer_pairs:
-                st.session_state.question_answer_pairs = question_answer_pairs
-                pair = random.choice(question_answer_pairs)
-                question, answer = extract_question_answer(pair)
-                st.session_state.question = question  # Save the question in session state
-                st.session_state.answer = answer  # Save the answer in session state
-                st.session_state.user_answer = ""  # Clear the previous answer
-                st.session_state.checked = False  # Reset checked state
-                st.session_state.answer_correct = None  # Reset answer correctness
+        with st.spinner('Generating question...'):
+            question_text = asyncio.run(generate_question(difficulty, topic))
+            st.session_state.question, st.session_state.answer = extract_question_answer(question_text)
+            st.session_state.user_answer = ""  # Clear the previous answer
+            st.session_state.checked = False  # Reset checked state
+            st.session_state.answer_correct = None  # Reset answer correctness
                 
     # Display the current question
     if st.session_state.question:
