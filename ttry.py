@@ -1,7 +1,6 @@
 import streamlit as st
 from openai import AsyncOpenAI
 import asyncio
-import random
 import difflib
 
 # Instantiate the OpenAI async client
@@ -95,10 +94,15 @@ def is_answer_correct(user_answer, correct_answer):
         # Fall back to string comparison if not numeric
         return difflib.SequenceMatcher(None, user_answer.lower().strip(), correct_answer.lower().strip()).ratio() > 0.8
 
-async def get_comment(correct):
+async def get_comment(correct, hint_requested=False, i_am_correct=False):
     # Use OpenAI API to generate a humorous and sarcastic comment based on the correctness of the answer
-    correctness = "correct" if correct else "incorrect"
-    prompt = f"Generate a humorous and sarcastic Taglish comment for a {correctness} answer."
+    if i_am_correct:
+        prompt = "Generate a humorous and sarcastic comment apologizing for not checking the facts."
+    else:
+        correctness = "correct" if correct else "incorrect"
+        hint_part = " and requested a hint" if hint_requested else ""
+        prompt = f"Generate a humorous and sarcastic English mix with Filipino comment for a {correctness} answer{hint_part}."
+    
     response = await client.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=[{"role": "user", "content": prompt}]
@@ -159,7 +163,7 @@ def main():
             st.session_state.user_answer = ""  # Clear the previous answer
             st.session_state.checked = False  # Reset checked state
             st.session_state.answer_correct = None  # Reset answer correctness
-            st.session_state.comment = ""  # Clear the previous comment
+            st.session_state.comment = ""  # Reset comment
     
     # Generate a new question if button is clicked
     if st.button("Generate Question"):
@@ -177,26 +181,28 @@ def main():
                 st.session_state.user_answer = user_answer  # Store the user's answer
                 st.session_state.checked = True  # Mark as checked
                 st.session_state.answer_correct = is_answer_correct(user_answer, st.session_state.answer)
-                st.session_state.comment = asyncio.run(get_comment(st.session_state.answer_correct))
                 if st.session_state.answer_correct:
                     st.success("Correct!")
                     st.session_state.score += score_values[difficulty]
                 else:
                     st.error(f"Incorrect! The correct answer was: {st.session_state.answer}")
+                st.session_state.comment = asyncio.run(get_comment(st.session_state.answer_correct))
 
         # Show hint button
         if st.button("Show Hint"):
             st.info(f"Hint: {st.session_state.hint}")
+            st.session_state.comment = asyncio.run(get_comment(False, hint_requested=True))
 
     # Display Naevis' comment
-    if st.session_state.checked and st.session_state.comment:
+    if st.session_state.comment:
         st.markdown(f"**Naevis:** {st.session_state.comment}")
 
     # "I am correct" button
     if st.session_state.checked and not st.session_state.answer_correct:
         if st.button("I am Correct", key="i_am_correct"):
-            st.success("You confirmed your answer as correct!")
             st.session_state.score += score_values[difficulty]
+            st.session_state.comment = asyncio.run(get_comment(False, i_am_correct=True))
+            st.experimental_rerun()  # Ensure the new comment is displayed immediately
 
     # "Next Question" button
     if st.session_state.checked:
