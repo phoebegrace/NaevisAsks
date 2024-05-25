@@ -94,15 +94,18 @@ def is_answer_correct(user_answer, correct_answer):
         # Fall back to string comparison if not numeric
         return difflib.SequenceMatcher(None, user_answer.lower().strip(), correct_answer.lower().strip()).ratio() > 0.8
 
-async def get_comment(correct=None, hint_requested=False, i_am_correct=False):
+async def get_comment(correct=None, hint_requested=False, i_am_correct=False, correct_answer=None):
     # Use OpenAI API to generate a humorous and sarcastic comment based on the correctness of the answer
     if i_am_correct:
-        prompt = "Generate a sassy comment apologizing for not checking the facts."
+        prompt = "Generate a cute and sassy comment apologizing for not checking the facts."
     elif hint_requested:
-        prompt = "Generate a sassy comment for giving a hint."
+        prompt = "Generate a cute and sassy comment in giving a hint."
     else:
         correctness = "correct" if correct else "incorrect"
-        prompt = f"Generate a sassy comment for a {correctness} answer."
+        if not correct:
+            prompt = f"Generate a cute comment for the incorrect answer."
+        else:
+            prompt = f"Generate a cute and sassy comment for the correct answer."
     
     response = await client.chat.completions.create(
         model="gpt-3.5-turbo",
@@ -118,7 +121,7 @@ def main():
     st.markdown("""
         ## Welcome to Naevis Asks!
         ### Your Ultimate Quiz Experience
-        Hello! This is NaevisAsks! I’m Naevis, and I’m thrilled to welcome you here! I am here to challenge your knowledge and provide some fun. Whether you’re a devoted K-pop fan or a trivia lover, you’re in the right place. Select your favorite topic, choose a difficulty level, and let's dive into the quiz. Together, we'll explore fascinating facts and see how high you can score.
+        Hello! This is NaevisAsks! I’m Naevis, and I’m thrilled to welcome you here! I am here to challenge your knowledge and provide some fun. Whether you’re into entertainment or a trivia lover, you’re in the right place. Select your favorite topic, choose a difficulty level, and let's dive into the quiz. Together, we'll explore fascinating facts and see how high you can score.
     """, unsafe_allow_html=True)   
 
     # Initialize score in session state
@@ -147,7 +150,7 @@ def main():
     score_values = {"easy": 1, "medium": 2, "hard": 3}
 
     # Selection for topic
-    topic = st.selectbox("Select a topic:", ["Trivia", "Math", "General Knowledge", "Science", "aespa", "Slang Knowledge", "K-POP", "Philippine History", "Riddles", "Philippine Knowledge", "K-Drama", "Philippine Entertainment"])
+    topic = st.selectbox("Select a topic:", ["Trivia", "Math", "Riddles", "General Knowledge", "Science", "Geography", "Astronomy", "IT Knowledge", "Accounting", "English Knowledge", "Arts","Philippine History", "Philippine Knowledge", "Philippine Entertainment", "Animal Trivia", "Disney", "Greek Mythology", "Mobile Legends Bang Bang", "Valorant", "Anime", "K-Drama", "aespa Knowledge", "K-Pop Knowledge", "Slang Knowledge", "Korean Knowledge", "Guess the O.P.M. (Original Pinoy Music) Song"])
     
     # Selection for difficulty level
     difficulty = st.selectbox("Select the difficulty level:", ["easy", "medium", "hard"])
@@ -187,7 +190,7 @@ def main():
                     st.session_state.score += score_values[difficulty]
                 else:
                     st.error(f"Incorrect! The correct answer was: {st.session_state.answer}")
-                st.session_state.comment = asyncio.run(get_comment(st.session_state.answer_correct))
+                st.session_state.comment = asyncio.run(get_comment(st.session_state.answer_correct, correct_answer=st.session_state.answer))
 
         # Show hint button
         if st.button("Show Hint"):
@@ -210,6 +213,7 @@ def main():
         if st.button("Next Question"):
             generate_new_question()
             st.experimental_rerun()  # Ensure the new question is displayed immediately
+
 
     # Display the current score
     st.markdown(f"<h3>Your current score is: {st.session_state.score}</h3>", unsafe_allow_html=True)
