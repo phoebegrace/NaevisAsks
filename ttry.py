@@ -99,7 +99,7 @@ async def get_comment(correct=None, hint_requested=False, i_am_correct=False):
     if i_am_correct:
         prompt = "Generate a sassy comment apologizing for not checking the facts."
     elif hint_requested:
-        prompt = "Generate a sassy comment for requesting a hint."
+        prompt = "Generate a sassy comment for giving a hint."
     else:
         correctness = "correct" if correct else "incorrect"
         prompt = f"Generate a sassy comment for a {correctness} answer."
