@@ -94,14 +94,15 @@ def is_answer_correct(user_answer, correct_answer):
         # Fall back to string comparison if not numeric
         return difflib.SequenceMatcher(None, user_answer.lower().strip(), correct_answer.lower().strip()).ratio() > 0.8
 
-async def get_comment(correct, hint_requested=False, i_am_correct=False):
+async def get_comment(correct=None, hint_requested=False, i_am_correct=False):
     # Use OpenAI API to generate a humorous and sarcastic comment based on the correctness of the answer
     if i_am_correct:
-        prompt = "Generate a humorous and sarcastic English mixing with Filipino language comment apologizing for not checking the facts."
+        prompt = "Generate a sassy comment apologizing for not checking the facts."
+    elif hint_requested:
+        prompt = "Generate a sassy comment for requesting a hint."
     else:
         correctness = "correct" if correct else "incorrect"
-        hint_part = " and requested a hint" if hint_requested else ""
-        prompt = f"Generate a humorous and sarcastic English mix with Filipino comment for a {hint_part} answer."
+        prompt = f"Generate a sassy comment for a {correctness} answer."
     
     response = await client.chat.completions.create(
         model="gpt-3.5-turbo",
@@ -191,7 +192,7 @@ def main():
         # Show hint button
         if st.button("Show Hint"):
             st.info(f"Hint: {st.session_state.hint}")
-            st.session_state.comment = asyncio.run(get_comment(False, hint_requested=True))
+            st.session_state.comment = asyncio.run(get_comment(hint_requested=True))
 
     # Display Naevis' comment
     if st.session_state.comment:
@@ -201,7 +202,7 @@ def main():
     if st.session_state.checked and not st.session_state.answer_correct:
         if st.button("I am Correct", key="i_am_correct"):
             st.session_state.score += score_values[difficulty]
-            st.session_state.comment = asyncio.run(get_comment(False, i_am_correct=True))
+            st.session_state.comment = asyncio.run(get_comment(i_am_correct=True))
             st.experimental_rerun()  # Ensure the new comment is displayed immediately
 
     # "Next Question" button
