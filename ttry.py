@@ -13,6 +13,7 @@ def load_css():
         <style>
         .stApp {
             background-color: #000000;
+            color: white;
         }
         .main-title {
             text-align: center;
