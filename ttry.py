@@ -25,6 +25,7 @@ def load_css():
         }
         .css-1aumxhk {
             font-size: 20px;
+            color: white;
         }
         .stButton > button {
             background-color: #2a555e;
