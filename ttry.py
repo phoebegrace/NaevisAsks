@@ -97,11 +97,11 @@ def is_answer_correct(user_answer, correct_answer):
 async def get_comment(correct, hint_requested=False, i_am_correct=False):
     # Use OpenAI API to generate a humorous and sarcastic comment based on the correctness of the answer
     if i_am_correct:
-        prompt = "Generate a humorous and sarcastic comment apologizing for not checking the facts."
+        prompt = "Generate a humorous and sarcastic English mixing with Filipino language comment apologizing for not checking the facts."
     else:
         correctness = "correct" if correct else "incorrect"
         hint_part = " and requested a hint" if hint_requested else ""
-        prompt = f"Generate a humorous and sarcastic English mix with Filipino comment for a {correctness} answer{hint_part}."
+        prompt = f"Generate a humorous and sarcastic English mix with Filipino comment for a {hint_part} answer."
     
     response = await client.chat.completions.create(
         model="gpt-3.5-turbo",
@@ -146,7 +146,7 @@ def main():
     score_values = {"easy": 1, "medium": 2, "hard": 3}
 
     # Selection for topic
-    topic = st.selectbox("Select a topic:", ["Trivia", "Math", "General Knowledge", "Earth Science", "K-POP", "Philippine History", "Riddles", "Philippine Knowledge", "K-Drama", "Philippine Entertainment"])
+    topic = st.selectbox("Select a topic:", ["Trivia", "Math", "General Knowledge", "Science", "aespa", "Slang Knowledge", "K-POP", "Philippine History", "Riddles", "Philippine Knowledge", "K-Drama", "Philippine Entertainment"])
     
     # Selection for difficulty level
     difficulty = st.selectbox("Select the difficulty level:", ["easy", "medium", "hard"])
