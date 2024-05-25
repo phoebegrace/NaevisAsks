@@ -9,6 +9,7 @@ client = AsyncOpenAI(api_key=st.secrets["API_key"])
 # Function to load CSS
 def load_css():
     st.markdown(
+        
         """
         <style>
         .stApp {
@@ -17,7 +18,7 @@ def load_css():
         }
         .main-title {
             text-align: center;
-            color: #fff;
+            color: white;
         }
         .sidebar .sidebar-content {
             background-color: #000000;
@@ -53,6 +54,9 @@ def load_css():
             color: white;
             text-align: center;
             padding: 10px 0;
+        }
+        h1, h2, h3, h4, p, label {
+            color: white;
         }
         </style>
         """,
