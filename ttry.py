@@ -17,7 +17,7 @@ def load_css():
         }
         .main-title {
             text-align: center;
-            color: white;
+            color: #fff;
         }
         .sidebar .sidebar-content {
             background-color: #000000;
