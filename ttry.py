@@ -6,10 +6,9 @@ import difflib
 # Instantiate the OpenAI async client
 client = AsyncOpenAI(api_key=st.secrets["API_key"])
 
-# Function to load CSS
+# CSS
 def load_css():
     st.markdown(
-        
         """
         <style>
         .stApp {
@@ -43,7 +42,7 @@ def load_css():
         }
         .stButton > button:hover {
             background-color: #ffffff;
-            color: #281633;
+            color: #000000;
         }
         .footer {
             position: fixed;
@@ -100,12 +99,12 @@ def is_answer_correct(user_answer, correct_answer):
         # Fall back to string comparison if not numeric
         return difflib.SequenceMatcher(None, user_answer.lower().strip(), correct_answer.lower().strip()).ratio() > 0.8
 
-async def get_comment(correct=None, hint_requested=False, i_am_correct=False, correct_answer=None):
-    # Use OpenAI API to generate a humorous and sarcastic comment based on the correctness of the answer
+async def get_comment(correct=None, hint_requested=False, i_am_correct=False, correct_answer=None, hint=None):
+    # Use OpenAI API to generate a cute and sarcastic comment based on the correctness of the answer
     if i_am_correct:
         prompt = "Generate a cute and sassy comment apologizing for not checking the facts."
     elif hint_requested:
-        prompt = "Generate a cute and sassy comment in giving a hint."
+        prompt = f"Generate a sassy hint about the answer '{hint}'."
     else:
         correctness = "correct" if correct else "incorrect"
         if not correct:
@@ -201,12 +200,12 @@ def main():
         # Show hint button
         if st.button("Show Hint"):
             st.info(f"Hint: {st.session_state.hint}")
-            st.session_state.comment = asyncio.run(get_comment(hint_requested=True))
+            st.session_state.comment = asyncio.run(get_comment(hint_requested=True, hint=st.session_state.hint))
 
     # Display Naevis' comment
     if st.session_state.comment:
         st.markdown(f"**Naevis:** {st.session_state.comment}")
-
+        
     # "I am correct" button
     if st.session_state.checked and not st.session_state.answer_correct:
         if st.button("I am Correct", key="i_am_correct"):
