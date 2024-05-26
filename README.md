@@ -1,4 +1,7 @@
-# Naevis Asks
+# Naevis Asks :alien::dizzy:
+
+![naevis](https://github.com/phoebegrace/NaevisAsks/assets/99640768/86c2b1bb-d896-4fff-a196-3ea7ca806dd3)
+
 
 Welcome to Naevis Asks! This is an interactive quiz application designed to challenge your knowledge across various topics. Built with Streamlit and OpenAI's GPT-3.5, Naevis Asks provides a fun and engaging quiz experience with a touch of sass and humor.
 
